@@ -1,56 +1,101 @@
-Простий REST API для роботи з контактами. Зберігає дані у хмарній базі Postgres через Sequelize.
 
-## Кроки
+Простий REST API для роботи з контактами з аутентифікацією через JWT та збереженням у PostgreSQL через Sequelize.
 
-1. **Гілка**
+## Як запустити
 
-   * Від `main` створити гілку `03-postgresql`
-
-2. **Налаштування середовища**
-
-   * Скопіювати `.env.example` у `.env`
-   * Відредагувати `.env`, вказати: `DATABASE_URL=postgresql://<user>:<pass>@<host>:<port>/<db>`
-
-3. **Встановлення залежностей**
-
+1. Клонувати репозиторій  
+2. Встановити залежності  
    ```bash
    npm install
    ```
-
-4. **Запуск локально**
-
+3. Створити файл `.env` в корені з такими змінними  
+   ```
+   DATABASE_URL=<ваш Postgres URL>
+   JWT_SECRET=<секрет для JWT>
+   PORT=3000
+   ```
+4. Запустити сервер у режимі розробки  
    ```bash
    npm run dev
    ```
 
-5. **Налаштування бази**
+## Ендпоінти
 
-   * Зареєструватися на Render і створити PostgresDB `db-contacts`
-   * Встановити pgAdmin або DBeaver
-   * Підключитися до БД та перевірити таблицю `contacts` з полями:
+### Auth
 
-     * `id`, `name`, `email`, `phone`, `favorite`, `createdAt`, `updatedAt`
+- **POST** `/api/auth/register`  
+  Реєстрація  
+  ```json
+  { "email": "user@example.com", "password": "pass123" }
+  ```
+  Відповідь 201:
+  ```json
+  { "user": { "email": "...", "subscription": "starter" } }
+  ```
 
-6. **Міграції**
+- **POST** `/api/auth/login`  
+  Логін  
+  ```json
+  { "email": "user@example.com", "password": "pass123" }
+  ```
+  Відповідь 200:
+  ```json
+  { "token": "<JWT>", "user": { "email": "...", "subscription": "starter" } }
+  ```
 
-   * Міграції не потрібні: таблиця створюється автоматично через `sequelize.sync()`
+- **POST** `/api/auth/logout`  
+  Логаут  
+  - Вимагає заголовок `Authorization: Bearer <JWT>`  
+  Відповідь 204 No Content
 
-7. **Ендпоінти**
+- **GET** `/api/auth/current`  
+  Поточний користувач  
+  - Вимагає заголовок `Authorization: Bearer <JWT>`  
+  Відповідь 200:
+  ```json
+  { "email": "...", "subscription": "starter" }
+  ```
 
-   * `GET /api/contacts` — список всіх контактів
-   * `GET /api/contacts/:id` — контакт за ID
-   * `POST /api/contacts` — створити контакт
-   * `PUT /api/contacts/:id` — оновити контакт
-   * `DELETE /api/contacts/:id` — видалити контакт
-   * `PATCH /api/contacts/:id/favorite` — оновити поле `favorite`
+### Contacts (захищені)
 
-## Валідація
+Усі запити з `Authorization: Bearer <JWT>`
 
-* Дані перевіряються через Joi
-* Якщо помилка в даних — повертається 400
+- **GET** `/api/contacts`  
+  Список контактів поточного юзера
 
-## Обробка помилок
+- **GET** `/api/contacts/:id`  
+  Деталі контакту
 
-* Невірний шлях — 404 `{ message: "Route not found" }`
-* Внутрішня помилка — 500 `{ message: "Server error" }`
+- **POST** `/api/contacts`  
+  Створити контакт  
+  ```json
+  { "name":"Ім’я","email":"a@b.c","phone":"+380..." }
+  ```
+  Відповідь 201 — новий контакт
+
+- **PUT** `/api/contacts/:id`  
+  Оновити контакт (name/email/phone)
+
+- **PATCH** `/api/contacts/:id/favorite`  
+  Оновити поле `favorite`  
+  ```json
+  { "favorite": true }
+  ```
+
+- **DELETE** `/api/contacts/:id`  
+  Видалити контакт
+
+## Модель даних
+
+- **User**  
+  - `id`, `email`, `password`, `subscription`, `token`
+- **Contact**  
+  - `id`, `name`, `email`, `phone`, `favorite`, `owner`
+
+## Помилки
+
+- 400 Bad Request — помилка валідації
+- 401 Unauthorized — неавторизований запит
+- 404 Not Found — маршрут або ресурс не знайдені
+- 409 Conflict — email вже використовується
 

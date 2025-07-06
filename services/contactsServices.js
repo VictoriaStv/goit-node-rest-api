@@ -1,32 +1,29 @@
-import { Contact } from "../models/contact.model.js";
+import { Contact } from "../models/index.js";
 
-export const listContacts = () => {
-  return Contact.findAll();
-};
+export const listContacts = (ownerId) =>
+  Contact.findAll({ where: { owner: ownerId } });
 
-export const getContactById = (id) => {
-  return Contact.findByPk(id);
-};
+export const getContactById = (ownerId, contactId) =>
+  Contact.findOne({ where: { id: contactId, owner: ownerId } });
 
-export const addContact = (data) => {
-  return Contact.create(data);
-};
+export const addContact = (ownerId, data) =>
+  Contact.create({ ...data, owner: ownerId });
 
-export const removeContact = async (id) => {
-  const contact = await Contact.findByPk(id);
+export const removeContact = async (ownerId, contactId) => {
+  const contact = await getContactById(ownerId, contactId);
   if (!contact) return null;
   await contact.destroy();
   return contact;
 };
 
-export const updateContact = async (id, data) => {
-  const contact = await Contact.findByPk(id);
+export const updateContact = async (ownerId, contactId, data) => {
+  const contact = await getContactById(ownerId, contactId);
   if (!contact) return null;
   return contact.update(data);
 };
 
-export const updateStatusContact = async (id, { favorite }) => {
-  const contact = await Contact.findByPk(id);
+export const updateStatusContact = async (ownerId, contactId, { favorite }) => {
+  const contact = await getContactById(ownerId, contactId);
   if (!contact) return null;
   return contact.update({ favorite });
 };
