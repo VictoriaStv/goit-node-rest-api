@@ -4,9 +4,8 @@ const validateBody = (schema) => {
   return (req, _, next) => {
     const { error } = schema.validate(req.body, { abortEarly: false });
     if (error) {
-      return next(
-        HttpError(400, error.details.map((d) => d.message).join(", "))
-      );
+      const msg = error.details.map((d) => d.message).join(", ");
+      return next(HttpError(400, msg));
     }
     next();
   };

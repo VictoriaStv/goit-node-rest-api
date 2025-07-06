@@ -1,41 +1,26 @@
 import Joi from "joi";
 
 export const createContactSchema = Joi.object({
-  name: Joi.string().min(3).required().messages({
-    "string.base": `"name" має бути рядком`,
-    "string.empty": `"name" не може бути порожнім`,
-    "string.min": `"name" має містити не менше {#limit} символів`,
-    "any.required": `"name" є обов'язковим полем`,
-  }),
-  email: Joi.string().email().required().messages({
-    "string.email": `"email" має бути валідним`,
-    "any.required": `"email" є обов'язковим полем`,
-  }),
+  name: Joi.string().min(3).required(),
+  email: Joi.string().email().required(),
   phone: Joi.string()
     .pattern(/^\+?\d{7,15}$/)
-    .required()
-    .messages({
-      "string.pattern.base": `"phone" має бути рядком цифр (7–15 символів), може починатися з "+"`,
-      "any.required": `"phone" є обов'язковим полем`,
-    }),
+    .required(),
 });
 
 export const updateContactSchema = Joi.object({
-  name: Joi.string().min(3).messages({
-    "string.base": `"name" має бути рядком`,
-    "string.empty": `"name" не може бути порожнім`,
-    "string.min": `"name" має містити не менше {#limit} символів`,
-  }),
-  email: Joi.string().email().messages({
-    "string.email": `"email" має бути валідним`,
-  }),
-  phone: Joi.string()
-    .pattern(/^\+?\d{7,15}$/)
-    .messages({
-      "string.pattern.base": `"phone" має бути рядком цифр (7–15 символів), може починатися з "+"`,
-    }),
+  name: Joi.string().min(3),
+  email: Joi.string().email(),
+  phone: Joi.string().pattern(/^\+?\d{7,15}$/),
 })
-  .or("name", "email", "phone") 
+  .or("name", "email", "phone")
   .messages({
     "object.missing": "Body must have at least one field",
   });
+
+export const favoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+}).messages({
+  "any.required": `"favorite" is required`,
+  "boolean.base": `"favorite" must be a boolean`,
+});

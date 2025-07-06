@@ -3,6 +3,7 @@ import validateBody from "../helpers/validateBody.js";
 import {
   createContactSchema,
   updateContactSchema,
+  favoriteSchema,
 } from "../schemas/contactsSchemas.js";
 import {
   getAllContacts,
@@ -10,16 +11,17 @@ import {
   deleteContact,
   createContact,
   updateContact,
+  updateFavorite,
 } from "../controllers/contactsControllers.js";
 
-const contactsRouter = express.Router();
+const router = express.Router();
 
-contactsRouter.get("/", getAllContacts);
-contactsRouter.get("/:id", getOneContact);
-contactsRouter.delete("/:id", deleteContact);
+router.get("/", getAllContacts);
+router.get("/:id", getOneContact);
+router.delete("/:id", deleteContact);
 
-contactsRouter.post("/", validateBody(createContactSchema), createContact);
+router.post("/", validateBody(createContactSchema), createContact);
+router.put("/:id", validateBody(updateContactSchema), updateContact);
+router.patch("/:id/favorite", validateBody(favoriteSchema), updateFavorite);
 
-contactsRouter.put("/:id", validateBody(updateContactSchema), updateContact);
-
-export default contactsRouter;
+export default router;
