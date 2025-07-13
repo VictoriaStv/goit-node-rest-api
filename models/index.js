@@ -1,17 +1,12 @@
-import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: "postgres",
-  logging: false,
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
-});
+import { sequelize } from "./db.js";
+import { User } from "./user.model.js";
+import { Contact } from "./contact.model.js";
+
+User.hasMany(Contact, { foreignKey: "owner" });
+Contact.belongsTo(User, { foreignKey: "owner" });
 
 export const initDb = async () => {
   try {
