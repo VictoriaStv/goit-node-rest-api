@@ -1,56 +1,91 @@
-Простий REST API для роботи з контактами. Зберігає дані у хмарній базі Postgres через Sequelize.
+# GOIT-NODE-REST-API-3
 
-## Кроки
+Простий REST API для роботи з контактами та верифікації email.
 
-1. **Гілка**
+## Старт
 
-   * Від `main` створити гілку `03-postgresql`
+1. Клонувати репозиторій:
 
-2. **Налаштування середовища**
-
-   * Скопіювати `.env.example` у `.env`
-   * Відредагувати `.env`, вказати: `DATABASE_URL=postgresql://<user>:<pass>@<host>:<port>/<db>`
-
-3. **Встановлення залежностей**
+   ```bash
+   git clone <your-repo-url>
+   cd GOIT-NODE-REST-API-3
+   ```
+2. Встановити залежності:
 
    ```bash
    npm install
    ```
+3. Створити файл `.env` у корені з такими змінними:
 
-4. **Запуск локально**
+   ```env
+   DATABASE_URL=postgresql://...
+   PORT=3000
+   JWT_SECRET=your_jwt_secret
+   BASE_URL=http://localhost:3000
+   SMTP_HOST=smtp.ukr.net
+   SMTP_PORT=465
+   SMTP_USER=you@ukr.net
+   SMTP_PASS=your_smtp_password
+   ```
+4. Запустити сервер:
 
    ```bash
-   npm run dev
+   npm start
    ```
 
-5. **Налаштування бази**
+## Опис API
 
-   * Зареєструватися на Render і створити PostgresDB `db-contacts`
-   * Встановити pgAdmin або DBeaver
-   * Підключитися до БД та перевірити таблицю `contacts` з полями:
+* **Реєстрація**
 
-     * `id`, `name`, `email`, `phone`, `favorite`, `createdAt`, `updatedAt`
+  * `POST /api/auth/register`
+  * Body: `{ "email": "...", "password": "..." }`
+  * Відправляє лист з посиланням для верифікації.
 
-6. **Міграції**
+* **Верифікація**
 
-   * Міграції не потрібні: таблиця створюється автоматично через `sequelize.sync()`
+  * `GET /api/auth/verify/:verificationToken`
+  * Перший запит — повертає 200, `Verification successful`.
+  * Повторний запит — 404, `User not found`.
 
-7. **Ендпоінти**
+* **Повторна відправка листа**
 
-   * `GET /api/contacts` — список всіх контактів
-   * `GET /api/contacts/:id` — контакт за ID
-   * `POST /api/contacts` — створити контакт
-   * `PUT /api/contacts/:id` — оновити контакт
-   * `DELETE /api/contacts/:id` — видалити контакт
-   * `PATCH /api/contacts/:id/favorite` — оновити поле `favorite`
+  * `POST /api/auth/verify`
+  * Body: `{ "email": "..." }`
+  * Якщо не верифікований — 200, `Verification email sent`.
+  * Якщо вже верифікований — 400, `Verification has already been passed`.
 
-## Валідація
+* **Логін**
 
-* Дані перевіряються через Joi
-* Якщо помилка в даних — повертається 400
+  * `POST /api/auth/login`
+  * Body: `{ "email": "...", "password": "..." }`
+  * Повертає токен лише після верифікації.
 
-## Обробка помилок
+* **Поточний користувач**
 
-* Невірний шлях — 404 `{ message: "Route not found" }`
-* Внутрішня помилка — 500 `{ message: "Server error" }`
+  * `GET /api/auth/current`
+  * Потрібен заголовок `Authorization: Bearer <token>`.
+
+* **Logout**
+
+  * `POST /api/auth/logout`
+  * Повертає 204.
+
+* **Аватар**
+
+  * `PATCH /api/auth/avatars`
+  * Потрібен файл `avatar` та токен.
+
+* **Контакти**
+
+  * `GET /api/contacts`
+  * `GET /api/contacts/:id`
+  * `POST /api/contacts` (JSON з полями `name`, `email`, `phone`)
+  * `PUT /api/contacts/:id` (оновлення полів)
+  * `PATCH /api/contacts/:id/favorite` (JSON `{ "favorite": true|false }`)
+  * `DELETE /api/contacts/:id`
+
+## Примітка
+
+* Потрібна версія Node LTS.
+* Моделі синхронізуються при запуску (`sequelize.sync({ alter: true })`).
 

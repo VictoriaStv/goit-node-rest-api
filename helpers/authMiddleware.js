@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.model.js";
 import HttpError from "./HttpError.js";
+import { User } from "../models/user.model.js";
 
-export const auth = async (req, res, next) => {
-  const authHeader = req.headers.authorization || "";
-  const [scheme, token] = authHeader.split(" ");
+export async function auth(req, res, next) {
+  const [scheme, token] = (req.headers.authorization || "").split(" ");
   if (scheme !== "Bearer" || !token) {
     return next(HttpError(401, "Not authorized"));
   }
@@ -23,4 +22,4 @@ export const auth = async (req, res, next) => {
 
   req.user = user;
   next();
-};
+}

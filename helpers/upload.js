@@ -4,11 +4,10 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const tempDir = path.join(__dirname, "..", "temp");
+const tmpDir = path.join(__dirname, "..", "temp");
 
 const storage = multer.diskStorage({
-  destination: tempDir,
+  destination: tmpDir,
   filename(_req, file, cb) {
     const ext = path.extname(file.originalname);
     const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
