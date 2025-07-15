@@ -1,4 +1,4 @@
-import dotenv from "dotenv"; 
+import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
@@ -15,6 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
 app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use("/api/contacts", contactsRouter);
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
 });
+
 app.use((err, _, res, __) => {
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
